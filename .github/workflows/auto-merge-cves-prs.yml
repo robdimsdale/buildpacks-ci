@@ -1,0 +1,53 @@
+name: Auto merge new CVEs PR
+
+on:
+  pull_request:
+    types:
+      - submitted
+
+jobs:
+  fetch-pr-details:
+    name: Merge or Rebase
+    runs-on: ubuntu-latest
+    outputs:
+      mergeable_state: ${{ steps.fetch-pr-details.outputs.mergeable_state }}
+      creator: ${{ steps.fetch-pr-details.outputs.creator }}
+      title: ${{ steps.fetch-pr-details.outputs.title }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Fetch Pull Request Details
+        id: fetch-pr-details
+        env:
+          NUMBER: ${{ github.event.pull_request.number }}
+          GITHUB_TOKEN: ${{ secrets.CF_BUILDPACKS_BOT_TOKEN }}
+        run: |
+          payload="$(
+            curl "https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${NUMBER}" \
+              --silent \
+              --location \
+              --header "Authorization: token ${GITHUB_TOKEN}"
+          )"
+          echo "::set-output name=mergeable_state::$(echo "${payload}" | jq -r -c .mergeable_state)"
+          echo "::set-output name=creator::$(echo "${payload}" | jq -r -c .user.login)"
+          echo "::set-output name=title::$(echo "${payload}" | jq -r -c .title)"
+
+  auto-merge:
+    name: Auto Merge
+    if: ${{ needs.fetch-pr-details.outputs.title == 'Update CVEs' && needs.fetch-pr-details.outputs.creator == 'cf-buildpacks' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Merge
+        if: ${{ needs.fetch-pr-details.outputs.mergeable_state == 'clean' || needs.fetch-pr-details.outputs.mergeable_state == 'unstable' }}
+        uses: paketo-buildpacks/github-config/actions/pull-request/merge@main
+        with:
+          token: ${{ secrets.CF_BUILDPACKS_BOT_TOKEN }}
+          number: ${{ github.event.pull_request.number }}
+
+      - name: Rebase
+        if: ${{ steps.pull_request.outputs.mergeable_state == 'behind' }}
+        uses: paketo-buildpacks/github-config/actions/pull-request/rebase@main
+        with:
+          token: ${{ secrets.CF_BUILDPACKS_BOT_TOKEN }}
+          number: ${{ github.event.pull_request.number }}
