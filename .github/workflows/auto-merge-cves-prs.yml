@@ -3,7 +3,7 @@ name: Auto merge new CVEs PR
 on:
   pull_request:
     types:
-      - submitted
+      - opened
 
 jobs:
   fetch-pr-details:
