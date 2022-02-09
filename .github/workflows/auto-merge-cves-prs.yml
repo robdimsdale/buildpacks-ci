@@ -1,24 +1,20 @@
-name: Auto merge new CVEs PR
+name: Auto merge paketo-bot PR
 
 on:
-  pull_request:
+  pull_request_review:
     types:
-      - opened
+      - submitted
 
 jobs:
-  fetch-pr-details:
+  automerge:
     name: Merge or Rebase
     runs-on: ubuntu-latest
-    outputs:
-      mergeable_state: ${{ steps.fetch-pr-details.outputs.mergeable_state }}
-      creator: ${{ steps.fetch-pr-details.outputs.creator }}
-      title: ${{ steps.fetch-pr-details.outputs.title }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
       - name: Fetch Pull Request Details
-        id: fetch-pr-details
+        id: pull_request
         env:
           NUMBER: ${{ github.event.pull_request.number }}
           GITHUB_TOKEN: ${{ secrets.CF_BUILDPACKS_BOT_TOKEN }}
@@ -30,16 +26,9 @@ jobs:
               --header "Authorization: token ${GITHUB_TOKEN}"
           )"
           echo "::set-output name=mergeable_state::$(echo "${payload}" | jq -r -c .mergeable_state)"
-          echo "::set-output name=creator::$(echo "${payload}" | jq -r -c .user.login)"
-          echo "::set-output name=title::$(echo "${payload}" | jq -r -c .title)"
 
-  auto-merge:
-    name: Auto Merge
-    if: ${{ needs.fetch-pr-details.outputs.title == 'Update CVEs' && needs.fetch-pr-details.outputs.creator == 'cf-buildpacks' }}
-    runs-on: ubuntu-latest
-    steps:
       - name: Merge
-        if: ${{ needs.fetch-pr-details.outputs.mergeable_state == 'clean' || needs.fetch-pr-details.outputs.mergeable_state == 'unstable' }}
+        if: ${{ steps.pull_request.outputs.mergeable_state == 'clean' || steps.pull_request.outputs.mergeable_state == 'unstable' }}
         uses: paketo-buildpacks/github-config/actions/pull-request/merge@main
         with:
           token: ${{ secrets.CF_BUILDPACKS_BOT_TOKEN }}
