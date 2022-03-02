@@ -170,7 +170,7 @@ describe 'Builder' do
         expect(binary_builder).to have_received(:build).with(source_input, '--php-extensions-file=' + File.join(php_extensions_dir, 'php-final-extensions.yml'))
 
         expect(artifact_output).to have_received(:move_dependency)
-          .with('php', '/fake-binary-builder/php7-7.3.0-linux-x64.tgz', 'php7_7.3.0_linux_x64_cflinuxfs3')
+          .with('php', '/fake-binary-builder/php-7.3.0-linux-x64.tgz', 'php_7.3.0_linux_x64_cflinuxfs3')
 
         expect(build_output).to have_received(:add_output)
           .with('7.3.0-cflinuxfs3.json',

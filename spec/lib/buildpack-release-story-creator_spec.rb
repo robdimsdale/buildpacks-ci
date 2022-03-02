@@ -8,6 +8,7 @@ describe BuildpackReleaseStoryCreator do
   let(:tracker_project_id) { 'tracker_project_id_stub' }
   let(:releng_tracker_project_id) { 'releng_tracker_project_id_stub' }
   let(:tracker_requester_id) { 555555 }
+  let(:tracker_before_story_id) { 111111 }
   let(:tracker_api_token) { 'tracker_api_token_stub' }
   let(:old_manifest) { 'dependencies: [{name: "dep-upgraded", version: "1.1"}, {name: "dep-removed", version: "2"}, {name: "dep-doesnt-change", version: "1"}]' }
   let(:new_manifest) { 'dependencies: [{name: "dep-upgraded", version: "1.2"}, {name: "dep-added", version: "2"}, {name: "dep-doesnt-change", version: "1"}]' }
@@ -26,6 +27,7 @@ describe BuildpackReleaseStoryCreator do
                                 previous_buildpack_version: previous_buildpack_version,
                                 tracker_project_id: tracker_project_id,
                                 tracker_requester_id: tracker_requester_id,
+                                before_story_id: tracker_before_story_id,
                                 tracker_api_token: tracker_api_token,
                                 releng_tracker_project_id: releng_tracker_project_id,
                                 new_manifest: new_manifest,
@@ -231,7 +233,8 @@ describe BuildpackReleaseStoryCreator do
              description: anything(),
              estimate: 0,
              labels: %w(elixir release),
-             requested_by_id: 555555
+             requested_by_id: 555555,
+             before_story_id: 111111,
             ).and_return(new_story)
     expect(new_story).to receive(:description=).
       with(anything())
