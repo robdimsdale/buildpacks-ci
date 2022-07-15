@@ -17,9 +17,9 @@ class BinaryBuilderWrapper
 
     Dir.chdir(@base_dir) do
       if extension_file && extension_file != ''
-        @runner.run('./bin/binary-builder', "--name=#{source_input.name}", "--version=#{version_prefix}#{source_input.version}", digest_arg, extension_file)
+        @runner.run('./cflinuxfs4/bin/binary-builder', "--name=#{source_input.name}", "--version=#{version_prefix}#{source_input.version}", digest_arg, extension_file)
       else
-        @runner.run('./bin/binary-builder', "--name=#{source_input.name}", "--version=#{version_prefix}#{source_input.version}", digest_arg)
+        @runner.run('./cflinuxfs4/bin/binary-builder', "--name=#{source_input.name}", "--version=#{version_prefix}#{source_input.version}", digest_arg)
       end
     end
   end
