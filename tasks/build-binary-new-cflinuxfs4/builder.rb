@@ -232,15 +232,15 @@ class DependencyBuild
   end
 
   def build_dotnet_sdk
-    Utils.prune_dotnet_files(['./shared/*'], true)
+    Utils.prune_dotnet_files(@source_input, ['./shared/*'], true)
   end
 
   def build_dotnet_runtime
-    Utils.prune_dotnet_files(['./dotnet'])
+    Utils.prune_dotnet_files(@source_input, ['./dotnet'])
   end
 
   def build_dotnet_aspnetcore
-    Utils.prune_dotnet_files(%w[./dotnet ./shared/Microsoft.NETCore.App])
+    Utils.prune_dotnet_files(@source_input, %w[./dotnet ./shared/Microsoft.NETCore.App])
   end
 
   def build_httpd
@@ -294,9 +294,9 @@ class DependencyBuild
       Runner.run('rm', '-f', 'get-pip.py')
     end
 
-    def self.prune_dotnet_files(files_to_exclude, write_runtime = false)
+    def self.prune_dotnet_files(source_input, files_to_exclude, write_runtime = false)
       source_file = File.expand_path(Dir.glob('source/*.tar.gz').first)
-      adjusted_file = "/tmp/#{@source_input.name}.#{@source_input.version}.linux-amd64.tar.xz"
+      adjusted_file = "/tmp/#{source_input.name}.#{source_input.version}.linux-amd64.tar.xz"
       exclude_list = files_to_exclude.map { |file| "--exclude=#{file}" }.join(' ')
       Dir.mktmpdir do |dir|
         Dir.chdir(dir) do
