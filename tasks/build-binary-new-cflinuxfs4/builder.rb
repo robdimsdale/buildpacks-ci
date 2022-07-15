@@ -226,15 +226,15 @@ class DependencyBuild
     merge_out_data(filename, "#{@filename_prefix}_linux_x64_#{@stack}")
   end
 
-  def build_dotnet_sdk(source_input)
+  def build_dotnet_sdk
     Utils.prune_dotnet_files(["./shared/*"], true)
   end
 
-  def build_dotnet_runtime(source_input)
+  def build_dotnet_runtime
     Utils.prune_dotnet_files(["./dotnet"])
   end
 
-  def build_dotnet_aspnetcore(source_input)
+  def build_dotnet_aspnetcore
     Utils.prune_dotnet_files(%w[./dotnet ./shared/Microsoft.NETCore.App])
   end
 
