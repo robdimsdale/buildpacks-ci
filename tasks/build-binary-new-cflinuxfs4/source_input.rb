@@ -26,6 +26,7 @@ class SourceInput
         data.dig('version') || '',
         nil,
         data.dig('source_sha') || '',
+        nil
       )
     else
       SourceInput.new(
@@ -37,7 +38,7 @@ class SourceInput
         data.dig('version', 'sha1'),
         data.dig('version', 'git_commit_sha'),
         data.dig('source', 'repo') || '',
-        data.dig('source', 'type') || '',
+        data.dig('source', 'type') || ''
       )
     end
   end

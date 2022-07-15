@@ -14,7 +14,7 @@ class ArtifactOutput
     FileUtils.mv(old_file_path, File.join(@base_dir, filename))
     {
       sha256: sha,
-      url:    "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
+      url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
     }
   end
 
@@ -22,7 +22,7 @@ class ArtifactOutput
 
   def ext(old_file_path)
     extension = File.basename(old_file_path)[/\.((sh|txt|phar|zip|tar\.gz|tar\.xz|tar\.bz2|tgz))$/, 1]
-    extension = "tgz" if extension == "tar.gz"
+    extension = 'tgz' if extension == 'tar.gz'
     extension
   end
 end

@@ -5,6 +5,7 @@ require 'pathname'
 require 'digest'
 require 'net/http'
 require 'tmpdir'
+require 'English'
 require_relative 'merge-extensions'
 require_relative 'binary_builder_wrapper'
 
@@ -65,7 +66,7 @@ module Runner
   class << self
     def run(*args)
       system({ 'DEBIAN_FRONTEND' => 'noninteractive' }, *args)
-      raise "Could not run #{args}" unless $?.success?
+      raise "Could not run #{args}" unless $CHILD_STATUS.success?
     end
   end
 end
@@ -106,7 +107,6 @@ module Archive
 end
 
 class DependencyBuild
-
   ## Constructor ##
   def initialize(source_input, out_data, binary_builder, artifact_output, stack)
     @source_input = source_input
@@ -123,8 +123,8 @@ class DependencyBuild
     else
       method_name = "build_#{@source_input.name.sub('-', '_')}"
       puts "Running #{method_name}"
-      if self.respond_to?(method_name)
-        self.public_send(method_name)
+      if respond_to?(method_name)
+        public_send(method_name)
       else
         raise "No build method for #{@source_input.name}"
       end
@@ -134,7 +134,7 @@ class DependencyBuild
   def build_cnb
     old_filepath = "artifacts/#{@source_input.name}.tgz"
     filename_prefix = "#{@filename_prefix}_linux_noarch_#{@stack}"
-    cnb_name = @source_input.repo.split("/").last
+    cnb_name = @source_input.repo.split('/').last
     uri = "https://github.com/#{@source_input.repo}/releases/download/v#{@source_input.version}/#{cnb_name}-#{@source_input.version}.tgz"
     HTTPHelper.download_url(uri, @source_input, old_filepath)
 
@@ -146,8 +146,8 @@ class DependencyBuild
       @artifact_output.move_dependency(
         @source_input.name,
         old_file_path,
-        filename_prefix,
-        )
+        filename_prefix
+      )
     )
   end
 
@@ -169,7 +169,7 @@ class DependencyBuild
 
     url = "#{@source_input.url}"
     file_path = url.slice((url.rindex('/') + 1)..(url.length))
-    dir = file_path.delete_suffix(".tar.gz")
+    dir = file_path.delete_suffix('.tar.gz')
 
     Dir.chdir('source') do
       # github-releases depwatcher has already downloaded .tar.gz
@@ -227,11 +227,11 @@ class DependencyBuild
   end
 
   def build_dotnet_sdk
-    Utils.prune_dotnet_files(["./shared/*"], true)
+    Utils.prune_dotnet_files(['./shared/*'], true)
   end
 
   def build_dotnet_runtime
-    Utils.prune_dotnet_files(["./dotnet"])
+    Utils.prune_dotnet_files(['./dotnet'])
   end
 
   def build_dotnet_aspnetcore
@@ -251,7 +251,7 @@ class DependencyBuild
   def build_miniconda
     content = URI.open(@source_input.url).read
     Sha.verify_digest(content, @source_input)
-    sha256 = Sha.get_digest(content, "sha256")
+    sha256 = Sha.get_digest(content, 'sha256')
     @out_data[:url] = @source_input.url
     @out_data[:sha256] = sha256
   end
@@ -268,7 +268,7 @@ class DependencyBuild
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
         Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', "pip==#{@source_input.version}")
-        content = File.open().read
+        content = File.open.read
         Sha.verify_digest(content, @source_input)
 
         Archive.strip_top_level_directory_from_tar("pip-#{@source_input.version}.tar.gz")
@@ -292,7 +292,7 @@ class DependencyBuild
     def self.prune_dotnet_files(files_to_exclude, write_runtime = false)
       source_file = File.expand_path(Dir.glob('source/*.tar.gz').first)
       adjusted_file = "/tmp/#{@source_input.name}.#{@source_input.version}.linux-amd64.tar.xz"
-      exclude_list = files_to_exclude.map { |file| "--exclude=#{file}" }.join(" ")
+      exclude_list = files_to_exclude.map { |file| "--exclude=#{file}" }.join(' ')
       Dir.mktmpdir do |dir|
         Dir.chdir(dir) do
           `tar -xf #{source_file} #{exclude_list}`
@@ -307,7 +307,7 @@ class DependencyBuild
 end
 
 class Builder
-  def execute(binary_builder, stack, source_input, build_input, build_output, artifact_output, dep_metadata_output, php_extensions_dir = __dir__, skip_commit = false)
+  def execute(binary_builder, stack, source_input, build_input, build_output, artifact_output, dep_metadata_output, _php_extensions_dir = __dir__, skip_commit = false)
     cnb_list = [
       'org.cloudfoundry.node-engine',
       'org.cloudfoundry.npm',
@@ -331,12 +331,10 @@ class Builder
       'org.cloudfoundry.go-compiler',
       'org.cloudfoundry.go-mod',
       'org.cloudfoundry.dep',
-      'org.cloudfoundry.icu',
+      'org.cloudfoundry.icu'
     ]
 
-    unless skip_commit
-      build_input.copy_to_build_output
-    end
+    build_input.copy_to_build_output unless skip_commit
 
     out_data = {
       tracker_story_id: build_input.tracker_story_id,

@@ -1,7 +1,7 @@
 class BuildInput
   attr_reader :tracker_story_id, :url
 
-  def initialize(tracker_story_id, url=nil)
+  def initialize(tracker_story_id, url = nil)
     @tracker_story_id = tracker_story_id
     @url = url
   end
