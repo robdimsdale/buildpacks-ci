@@ -19,13 +19,13 @@ class SourceInput
 
   def self.from_file(source_file)
     data = JSON.parse(File.open(source_file).read)
-    if data.dig('name')
+    if data['name']
       SourceInput.new(
-        data.dig('name') || '',
-        data.dig('source_uri') || '',
-        data.dig('version') || '',
+        data['name'] || '',
+        data['source_uri'] || '',
+        data['version'] || '',
         nil,
-        data.dig('source_sha') || '',
+        data['source_sha'] || '',
         nil
       )
     else

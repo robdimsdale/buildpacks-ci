@@ -6,7 +6,7 @@ require 'digest'
 require 'net/http'
 require 'tmpdir'
 require 'English'
-require_relative 'merge-extensions'
+require_relative 'merge_extensions'
 require_relative 'binary_builder_wrapper'
 
 module HTTPHelper
@@ -53,10 +53,15 @@ module Sha
     end
 
     def get_digest(content, algorithm)
-      if algorithm == 'sha256'
+      case algorithm
+      when 'sha256'
         Digest::SHA2.new(256).hexdigest(content)
-      elsif algorithm == 'md5'
+      when 'md5'
         Digest::MD5.hexdigest(content)
+      when 'sha1'
+        Digest::SHA1.hexdigest(content)
+      else
+        raise 'Unknown digest algorithm'
       end
     end
   end
@@ -249,7 +254,7 @@ class DependencyBuild
   end
 
   def build_miniconda
-    content = URI.open(@source_input.url).read
+    content = HTTPHelper.read_file(@source_input.url)
     Sha.verify_digest(content, @source_input)
     sha256 = Sha.get_digest(content, 'sha256')
     @out_data[:url] = @source_input.url

@@ -9,8 +9,8 @@ class BuildInput
   def self.from_file(build_file)
     data = JSON.parse(File.open(build_file).read)
     BuildInput.new(
-      data.dig('tracker_story_id') || '',
-      data.dig('url')
+      data['tracker_story_id'] || '',
+      data['url']
     )
   end
 

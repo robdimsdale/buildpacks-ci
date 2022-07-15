@@ -10,7 +10,7 @@ class BaseExtensions
   end
 
   def yml_validate(path)
-    raise 'Base Extesions requires a .yml file' unless ['.yaml', '.yml'].include? File.extname(path)
+    raise 'Base Extesions requires a .yml file' unless %w[.yaml .yml].include? File.extname(path)
   end
 
   def find_ext(ext_name, category = 'extensions')
@@ -45,7 +45,8 @@ class BaseExtensions
     true
   end
 
-  def patch(patch_file) # return a new BaseExtensions object that has been patched
+  # return a new BaseExtensions object that has been patched
+  def patch(patch_file)
     new_base_extensions = BaseExtensions.new(@base_path)
     new_base_extensions.patch!(patch_file)
     new_base_extensions
