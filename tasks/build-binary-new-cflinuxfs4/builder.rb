@@ -11,15 +11,27 @@ require_relative 'binary_builder_wrapper'
 module HTTPHelper
   class << self
     def download(source_input, filename)
-      content = URI.open(source_input.url).read
-      Sha.verify_digest(content, source_input)
-      File.write(filename, content)
+      uri = URI.parse(source_input.url)
+      response = Net::HTTP.get_response(uri)
+      if response.code == '200'
+        Sha.verify_digest(response.body, source_input)
+        File.write(filename, response.body)
+      end
     end
 
     def download_url(url, source_input, filename)
-      content = URI.open(url).read
-      Sha.verify_digest(content, source_input)
-      File.write(filename, content)
+      uri = URI.parse(url)
+      response = Net::HTTP.get_response(uri)
+      if response.code == '200'
+        Sha.verify_digest(response.body, source_input)
+        File.write(filename, response.body)
+      end
+    end
+
+    def read_file(url)
+      uri = URI.parse(url)
+      response = Net::HTTP.get_response(uri)
+      response.body if response.code == '200'
     end
   end
 end
@@ -30,7 +42,6 @@ module Sha
       sha1 = Digest::SHA1.hexdigest(content)
       sha256 = Digest::SHA2.new(256).hexdigest(content)
       md5 = Digest::MD5.hexdigest(content)
-      puts "source_input.sha1? #{source_input.sha1?}"
       if source_input.md5? && md5 != source_input.md5
         raise 'MD5 digest does not match version digest'
       elsif source_input.sha256? && sha256 != source_input.sha256
@@ -136,7 +147,7 @@ class DependencyBuild
         @source_input.name,
         old_file_path,
         filename_prefix,
-      )
+        )
     )
   end
 
@@ -338,7 +349,7 @@ class Builder
     }
 
     unless out_data[:source][:sha256]
-      content = URI.open(source_input.url).read
+      content = HTTPHelper.read_file(source_input.url)
       out_data[:source][:sha256] = Sha.get_digest(content, 'sha256')
     end
 
