@@ -308,6 +308,19 @@ class DependencyBuild
       end
       adjusted_file
     end
+
+    def self.write_runtime_version_file(source_file, sdk_dir)
+      Dir.chdir(sdk_dir) do
+        runtime_glob = './shared/Microsoft.NETCore.App/'
+        output = `tar tf #{source_file} #{runtime_glob}`
+        files = output.split("\n").select {|line| line.end_with? '/' }
+        version = Pathname.new(files.last).basename.to_s
+
+        File.open('RuntimeVersion.txt', 'w') do |f|
+          f.write(version)
+        end
+      end
+    end
   end
 end
 
