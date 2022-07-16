@@ -189,6 +189,7 @@ class DependencyBuild
     Dir.chdir(built_path) do
       Runner.run('tar', 'czf', old_filename, 'include', 'lib')
     end
+
     old_file_path = File.join(built_path, old_filename)
     filename_prefix = "#{@filename_prefix}_linux_noarch_#{@stack}"
 
@@ -225,30 +226,37 @@ class DependencyBuild
     @source_input.version = @source_input.version.delete_prefix('v')
     @binary_builder.build(@source_input)
 
-    filename = "#{@binary_builder.base_dir}/#{@source_input.name}-#{@source_input.version}-linux-x64.tgz"
+    old_filepath = "#{@binary_builder.base_dir}/#{@source_input.name}-#{@source_input.version}-linux-x64.tgz"
+    filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
     Archive.strip_top_level_directory_from_tar(filename)
 
-    merge_out_data(filename, "#{@filename_prefix}_linux_x64_#{@stack}")
+    merge_out_data(old_filepath, filename_prefix)
   end
 
   def build_dotnet_sdk
-    Utils.prune_dotnet_files(@source_input, ['./shared/*'], true)
+    old_filepath = Utils.prune_dotnet_files(@source_input, ['./shared/*'], true)
+    filename_prefix = "#{@filename_prefix}_linux_x64_#{stack}"
+    merge_out_data(old_filepath, filename_prefix)
   end
 
   def build_dotnet_runtime
-    Utils.prune_dotnet_files(@source_input, ['./dotnet'])
+    old_filepath = Utils.prune_dotnet_files(@source_input, ['./dotnet'])
+    filename_prefix = "#{@filename_prefix}_linux_x64_#{stack}"
+    merge_out_data(old_filepath, filename_prefix)
   end
 
   def build_dotnet_aspnetcore
-    Utils.prune_dotnet_files(@source_input, %w[./dotnet ./shared/Microsoft.NETCore.App])
+    old_filepath = Utils.prune_dotnet_files(@source_input, %w[./dotnet ./shared/Microsoft.NETCore.App])
+    filename_prefix = "#{@filename_prefix}_linux_x64_#{stack}"
+    merge_out_data(old_filepath, filename_prefix)
   end
 
   def build_httpd
     @binary_builder.build(@source_input)
 
     old_file_path = "#{@binary_builder.base_dir}/#{@source_input.name}-#{@source_input.version}-linux-x64.tgz"
-    Archive.strip_top_level_directory_from_tar(old_file_path)
     filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
+    Archive.strip_top_level_directory_from_tar(old_file_path)
 
     merge_out_data(old_file_path, filename_prefix)
   end
@@ -263,7 +271,7 @@ class DependencyBuild
 
   def bundle_pip_dependencies
     # final resting place for pip source and dependencies
-    file_path = "/tmp/pip-#{@source_input.version}.tgz"
+    old_filepath = "/tmp/pip-#{@source_input.version}.tgz"
     ENV['LC_CTYPE'] = 'en_US.UTF-8'
 
     # For the latest version of pip, it requires python version >= 3.7 (ref: https://github.com/pypa/pip/pull/10641),
@@ -280,10 +288,13 @@ class DependencyBuild
         Runner.run('tar', 'zxf', "pip-#{@source_input.version}.tar.gz")
         Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'setuptools==62.1.0')
         Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'wheel')
-        Runner.run('tar', 'zcvf', file_path, '.')
+        Runner.run('tar', 'zcvf', old_filepath, '.')
       end
     end
-    file_path
+
+    filename_prefix = "#{@filename_prefix}_linux_noarch_#{@stack}"
+
+    merge_out_data(old_filepath, filename_prefix)
   end
 
   class Utils
@@ -313,7 +324,7 @@ class DependencyBuild
       Dir.chdir(sdk_dir) do
         runtime_glob = './shared/Microsoft.NETCore.App/'
         output = `tar tf #{source_file} #{runtime_glob}`
-        files = output.split("\n").select {|line| line.end_with? '/' }
+        files = output.split("\n").select { |line| line.end_with? '/' }
         version = Pathname.new(files.last).basename.to_s
 
         File.open('RuntimeVersion.txt', 'w') do |f|
