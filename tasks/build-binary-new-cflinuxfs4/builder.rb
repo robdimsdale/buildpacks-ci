@@ -235,19 +235,19 @@ class DependencyBuild
 
   def build_dotnet_sdk
     old_filepath = Utils.prune_dotnet_files(@source_input, ['./shared/*'], true)
-    filename_prefix = "#{@filename_prefix}_linux_x64_#{stack}"
+    filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
     merge_out_data(old_filepath, filename_prefix)
   end
 
   def build_dotnet_runtime
     old_filepath = Utils.prune_dotnet_files(@source_input, ['./dotnet'])
-    filename_prefix = "#{@filename_prefix}_linux_x64_#{stack}"
+    filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
     merge_out_data(old_filepath, filename_prefix)
   end
 
   def build_dotnet_aspnetcore
     old_filepath = Utils.prune_dotnet_files(@source_input, %w[./dotnet ./shared/Microsoft.NETCore.App])
-    filename_prefix = "#{@filename_prefix}_linux_x64_#{stack}"
+    filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
     merge_out_data(old_filepath, filename_prefix)
   end
 

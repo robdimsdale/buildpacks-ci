@@ -275,7 +275,7 @@ jobs:
       version: every
   - do:
     - task: create-new-version-line-story
-      file: buildpacks-ci/tasks/build-binary-new/create-new-version-line-story.yml
+      file: buildpacks-ci/tasks/create-new-version-line-story/create-new-version-line-story.yml
       params:
         TRACKER_PROJECT_ID: '{{cf-buildpacks-private-tracker-id}}'
         TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
@@ -329,7 +329,7 @@ jobs:
   <% end %>
   <% if dep_name.downcase == 'node' && line.downcase == 'node-lts' %>
     - task: create-tracker-story
-      file: buildpacks-ci/tasks/build-binary-new/create_node_lts.yml
+      file: buildpacks-ci/tasks/create-new-version-line-story/create_node_lts.yml
       params:
         TRACKER_PROJECT_ID: '{{cf-buildpacks-rel-eng-tracker-id}}'
         TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'

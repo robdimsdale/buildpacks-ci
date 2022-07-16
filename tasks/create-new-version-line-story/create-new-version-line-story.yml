@@ -1,0 +1,23 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+  - name: source
+outputs:
+  - name: builds-artifacts
+run:
+  path: bash
+  args:
+    - -cl
+    - gem install tracker_api && buildpacks-ci/tasks/create-new-version-line-story/create-new-version-line-story.rb
+params:
+  TRACKER_API_TOKEN:
+  TRACKER_PROJECT_ID:
+  TRACKER_REQUESTER_ID:
+  BUILDPACKS:
+  EXISTING_VERSION_LINES:
+  TRACKER_BEFORE_ID:
